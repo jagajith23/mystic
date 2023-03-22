@@ -1,7 +1,8 @@
 TOKEN_TYPE = {
     # Identifier and literals 
     'Identifier': 'identifier',
-    'Number': 'number',
+    'Integer': 'integer',
+    'Float': 'float',
 
     # Arithmetic Operators
     'Plus': 'plus',                                   # +
@@ -34,8 +35,9 @@ TOKEN_TYPE = {
 }
 
 class Token:
-    def __init__(self, type, value, line, col):
+    def __init__(self, type, value=None):
         self.type = type
         self.value = value
-        self.line = line
-        self.col = col
+
+    def __repr__(self):
+        return f"{self.type}: {self.value}"
