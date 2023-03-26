@@ -31,13 +31,21 @@ TOKEN_TYPE = {
     'RParen': 'rparen',                               # )
 
     # Special Token
-    'EndOfInput': 'end_of_input'
+    'EOF': 'end_of_file'
 }
 
 class Token:
-    def __init__(self, type, value=None):
+    def __init__(self, type, value=None, pos_start=None, pos_end=None):
         self.type = type
         self.value = value
+
+        if pos_start:
+            self.pos_start = pos_start.copy()
+            self.pos_end = pos_start.copy()
+            self.pos_end.advance()
+        
+        if pos_end:
+            self.pos_end = pos_end.copy()
 
     def __repr__(self):
         return f"{self.type}: {self.value}"
