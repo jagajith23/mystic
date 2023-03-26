@@ -62,6 +62,7 @@ class Parser:
             return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end, "Expected '+', '-', '*', '/', '(', or ')'"))
         return res
     
+    # Factor -> (Plus | Minus) Factor | Integer | Float | LParen Expr RParen
     def factor(self):
         res = ParseResult()
         tok = self.current_tok
@@ -88,12 +89,15 @@ class Parser:
         
         return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, "Expected Integer or Float"))
     
+    # Term -> Factor ((Times | Div) Factor)*
     def term(self):
         return self.bin_op(self.factor, (TOKEN_TYPE['Times'], TOKEN_TYPE['Div']))
     
+    # Expr -> Term ((Plus | Minus) Term)*
     def expr(self):
         return self.bin_op(self.term, (TOKEN_TYPE['Plus'], TOKEN_TYPE['Minus']))
 
+    # BinOp -> LeftNode Op RightNode
     def bin_op(self, func, ops):
         res = ParseResult()
         left = res.register(func())
