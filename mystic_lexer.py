@@ -65,7 +65,7 @@ class Lexer:
                 pos_start = self.pos.copy()
                 char = self.current_char
                 self.advance()
-                return [], IllegalCharError(f"'{char}'", pos_start, self.pos)
+                return [], IllegalCharError(pos_start, self.pos, f"'{char}'")
 
         tokens.append(Token(TOKEN_TYPE['EOF'], None, pos_start=self.pos))
         return tokens, None
