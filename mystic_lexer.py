@@ -1,7 +1,10 @@
 from error import IllegalCharError
-from token import Token, TOKEN_TYPE
+from token import Token, TOKEN_TYPE, KEYWORDS
+import string
 
 DIGITS = '0123456789'
+LETTERS = string.ascii_letters
+LETTERS_DIGITS = LETTERS + DIGITS
 
 class Position:
     def __init__(self, filename, file_text, idx, line, col):
@@ -43,6 +46,8 @@ class Lexer:
                 self.advance()
             elif self.current_char in DIGITS:
                 tokens.append(self.make_number())
+            elif self.current_char in LETTERS:
+                tokens.append(self.make_identifier())
             elif self.current_char == '+':
                 tokens.append(Token(TOKEN_TYPE['Plus'], '+', pos_start=self.pos))
                 self.advance()
@@ -54,6 +59,9 @@ class Lexer:
                 self.advance()
             elif self.current_char == '/':
                 tokens.append(Token(TOKEN_TYPE['Div'], '/', pos_start=self.pos))
+                self.advance()
+            elif self.current_char == '=':
+                tokens.append(Token(TOKEN_TYPE['Assign'], '=', pos_start=self.pos))
                 self.advance()
             elif self.current_char == '(':
                 tokens.append(Token(TOKEN_TYPE['LParen'], '(', pos_start=self.pos))
@@ -88,3 +96,14 @@ class Lexer:
             return Token(TOKEN_TYPE['Integer'], int(num_str), pos_start=pos_start, pos_end=self.pos)
         else:
             return Token(TOKEN_TYPE['Float'], float(num_str), pos_start=pos_start, pos_end=self.pos)
+
+    def make_identifier(self):
+        id_str = ''
+        pos_start = self.pos.copy()
+
+        while self.current_char != None and self.current_char in LETTERS_DIGITS + '_':
+            id_str += self.current_char
+            self.advance()
+
+        tok_type = TOKEN_TYPE['Keyword'] if id_str in KEYWORDS else TOKEN_TYPE['Identifier']
+        return Token(tok_type, id_str, pos_start=pos_start, pos_end=self.pos)

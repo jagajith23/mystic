@@ -59,8 +59,31 @@ class Number:
                 return None, RunTimeError(other.pos_start, other.pos_end, "Division by zero", self.context)
             return Number(self.value / other.value).set_context(self.context), None
 
+    def copy(self):
+        copy = Number(self.value)
+        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        return copy
+
     def __repr__(self):
         return f"{self.value}"
+
+class SymbolTable:
+    def __init__(self):
+        self.symbols = {}
+        self.parent = None
+
+    def get_val(self, name):
+        value = self.symbols.get(name, None)
+        if value == None and self.parent:
+            return self.parent.get(name)
+        return value
+
+    def set_val(self, name, value):
+        self.symbols[name] = value
+    
+    def remove_val(self, name):
+        del self.symbols[name]
 
 class Interpreter:
     def visit(self, node, context):
@@ -70,6 +93,26 @@ class Interpreter:
 
     def no_visit_method(self, node, context):
         raise Exception(f'No visit_{type(node).__name__} method defined')
+
+    def visit_VarAccessNode(self, node, context):
+        res = RunTimeResult()
+        var_name = node.tok.value
+        value = context.symbol_table.get_val(var_name)
+
+        if not value:
+            return res.failure(RunTimeError(node.pos_start, node.pos_end, f"'{var_name}' is not defined", context))
+
+        value = value.copy().set_pos(node.pos_start, node.pos_end)
+        return res.success(value)
+
+    def visit_VarAssignNode(self, node, context):
+        res = RunTimeResult()
+        var_name = node.tok.value
+        value = res.register(self.visit(node.value_node, context))
+        if res.error: return res
+
+        context.symbol_table.set_val(var_name, value)
+        return res.success(value)
 
     def visit_NumberNode(self, node, context):
         return RunTimeResult().success(Number(node.tok.value).set_context(context).set_pos(node.pos_start, node.pos_end))
