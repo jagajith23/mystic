@@ -37,7 +37,6 @@ class Scanner:
             self.__start = self.__current
             self.__scan_token()
 
-        # self.__tokens.add(Token(TokenType.EOF, "", None, self.__line))
         self.__add_token(TokenType.EOF)
         return self.__tokens
 
@@ -48,46 +47,63 @@ class Scanner:
         char = self.__advance()
 
         if char == "(":
-            self.__add_token(TokenType.LEFT_PAREN)
+            self.__add_token(TokenType.LEFT_PAREN, "(")
         elif char == ")":
-            self.__add_token(TokenType.RIGHT_PAREN)
+            self.__add_token(TokenType.RIGHT_PAREN, ")")
         elif char == "{":
-            self.__add_token(TokenType.LEFT_BRACE)
+            self.__add_token(TokenType.LEFT_BRACE, "{")
         elif char == "}":
-            self.__add_token(TokenType.RIGHT_BRACE)
+            self.__add_token(TokenType.RIGHT_BRACE, "}")
         elif char == ",":
-            self.__add_token(TokenType.COMMA)
+            self.__add_token(TokenType.COMMA, ",")
         elif char == ".":
-            self.__add_token(TokenType.DOT)
+            self.__add_token(TokenType.DOT, ".")
         elif char == "-":
-            self.__add_token(TokenType.MINUS)
+            self.__add_token(TokenType.MINUS, "-")
         elif char == "+":
-            self.__add_token(TokenType.PLUS)
+            self.__add_token(TokenType.PLUS, "+")
         elif char == ";":
-            self.__add_token(TokenType.SEMICOLON)
+            self.__add_token(TokenType.SEMICOLON, ";")
         elif char == "*":
-            self.__add_token(TokenType.STAR)
+            self.__add_token(TokenType.STAR, "*")
         elif char == "!":
             self.__add_token(
-                TokenType.BANG_EQUAL if self.__match("=") else TokenType.BANG
+                TokenType.BANG_EQUAL if self.__match("=") else TokenType.BANG, "!="
             )
         elif char == "=":
             self.__add_token(
-                TokenType.EQUAL_EQUAL if self.__match("=") else TokenType.EQUAL
+                TokenType.EQUAL_EQUAL if self.__match("=") else TokenType.EQUAL, "=="
             )
         elif char == "<":
             self.__add_token(
-                TokenType.LESS_EQUAL if self.__match("=") else TokenType.LESS
+                TokenType.LESS_EQUAL if self.__match("=") else TokenType.LESS, "<="
             )
         elif char == ">":
             self.__add_token(
-                TokenType.GREATER_EQUAL if self.__match("=") else TokenType.GREATER
+                TokenType.GREATER_EQUAL if self.__match("=") else TokenType.GREATER,
+                ">=",
             )
         elif char == "/":
             if self.__match("/"):
-                # A comment goes until the end of the line.
                 while self.__peek() != "\n" and not self.__is_at_end():
                     self.__advance()
+            elif self.__match("*"):
+                while (
+                    self.__peek() != "*"
+                    and self.__peek_next() != "/"
+                    and not self.__is_at_end()
+                ):
+                    if self.__peek() == "\n":
+                        self.__line += 1
+                    self.__advance()
+
+                if self.__is_at_end():
+                    self.mystic.error(self.__line, "Unterminated comment.")
+                    return
+
+                # The closing '*/'.
+                self.__advance()
+                self.__advance()
             else:
                 self.__add_token(TokenType.SLASH)
         elif char == " " or char == "\r" or char == "\t":
@@ -166,6 +182,11 @@ class Scanner:
             return "\0"
         return self.__source[self.__current]
 
+    def __peek_next(self) -> str:
+        if self.__current + 1 >= self.__source_len:
+            return "\0"
+        return self.__source[self.__current + 1]
+
     def __match(self, expected: str) -> bool:
         if self.__is_at_end():
             return False
@@ -180,7 +201,7 @@ class Scanner:
         return self.__source[self.__current - 1]
 
     def __add_token(self, token_type: TokenType, literal: object = None):
-        if literal:
+        if literal != None:
             text = self.__source[self.__start : self.__current]
             self.__tokens.append(Token(token_type, text, literal, self.__line))
         else:
@@ -207,4 +228,6 @@ class Scanner:
                 fractional_multiplier *= 0.1
                 fractional_part = fractional_part * 10 + (ord(char) - ord("0"))
 
-        return integer_part + fractional_multiplier * fractional_part
+        value = integer_part + fractional_multiplier * fractional_part
+
+        return value if is_fractional else value * 1.0

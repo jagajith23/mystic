@@ -71,7 +71,7 @@ class TokenType(Enum):
         cls.next_value += 1
         return member
 
-    def __repr__(self):
+    def __str__(self):
         return self.name
 
 
