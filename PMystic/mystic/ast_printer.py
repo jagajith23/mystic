@@ -28,21 +28,27 @@ class AstPrinter(Expr.Visitor):
             builder += " "
             builder += expr.accept(self)
         builder += ")"
+
+        # PostOrder
+        # for expr in exprs:
+        # builder += expr.accept(self)
+        # builder += " "
+        # builder += name
         return builder
 
-    def main(self):
-        expression = Expr.Binary(
-            Expr.Unary(
-                Token(TokenType.MINUS, "-", None, 1),
-                Expr.Literal(value=123),
-            ),
-            Token(TokenType.STAR, "*", None, 1),
-            Expr.Grouping(
-                Expr.Literal(value=45.67),
-            ),
-        )
+    # def main(self):
+    #     expression = Expr.Binary(
+    #         Expr.Unary(
+    #             Token(TokenType.MINUS, "-", None, 1),
+    #             Expr.Literal(value=123),
+    #         ),
+    #         Token(TokenType.STAR, "*", None, 1),
+    #         Expr.Grouping(
+    #             Expr.Literal(value=45.67),
+    #         ),
+    #     )
 
-        print(self.print(expression))
+    #     print(self.print(expression))
 
 
 AstPrinter().main()
