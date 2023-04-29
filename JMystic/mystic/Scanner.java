@@ -1,11 +1,11 @@
-package JMystic;
+package JMystic.mystic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static JMystic.TokenType.*;
+import static JMystic.mystic.TokenType.*;
 
 /**
  * Scanner

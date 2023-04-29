@@ -1,4 +1,4 @@
-package JMystic;
+package JMystic.mystic;
 
 public class Token {
 

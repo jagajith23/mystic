@@ -1,4 +1,4 @@
-package JMystic;
+package JMystic.mystic;
 
 enum TokenType {
     // Single-character tokens.

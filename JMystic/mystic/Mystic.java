@@ -1,4 +1,4 @@
-package JMystic;
+package JMystic.mystic;
 
 import java.io.BufferedReader;
 import java.io.IOException;
