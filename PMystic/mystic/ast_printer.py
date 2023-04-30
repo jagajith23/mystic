@@ -31,8 +31,8 @@ class AstPrinter(Expr.Visitor):
 
         # PostOrder
         # for expr in exprs:
-        # builder += expr.accept(self)
-        # builder += " "
+        #     builder += expr.accept(self)
+        #     builder += " "
         # builder += name
         return builder
 
@@ -51,4 +51,4 @@ class AstPrinter(Expr.Visitor):
     #     print(self.print(expression))
 
 
-AstPrinter().main()
+# AstPrinter().main()

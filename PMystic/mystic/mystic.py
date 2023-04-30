@@ -1,5 +1,9 @@
 import sys
-import scanner as sc
+from scanner import Scanner
+from mystic_parser import MysticParser
+from ast_printer import AstPrinter
+from token_type import *
+from token import Token
 
 
 class Mystic:
@@ -23,11 +27,16 @@ class Mystic:
                 break
 
     def __run(self, source: str):
-        scanner = sc.Scanner(source, self)
+        scanner = Scanner(source, self)
         tokens = scanner.scan_tokens()
 
-        for token in tokens:
-            print(token)
+        parser = MysticParser(tokens, self)
+        expression = parser.parse()
+
+        if self.__had_error:
+            return
+
+        print(AstPrinter().print(expression))
 
     def __report(self, line: int, where: str, message: str):
         print("[line " + str(line) + "] Error" + where + ": " + message)
@@ -35,6 +44,12 @@ class Mystic:
 
     def error(self, line: int, message: str):
         self.__report(line, "", message)
+
+    def error_at(self, token: Token, message: str):
+        if token.type == TokenType.EOF:
+            self.__report(token.line, " at end", message)
+        else:
+            self.__report(token.line, " at '" + token.lexeme + "'", message)
 
     def main(self):
         args = sys.argv

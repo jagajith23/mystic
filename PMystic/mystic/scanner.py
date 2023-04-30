@@ -105,7 +105,7 @@ class Scanner:
                 self.__advance()
                 self.__advance()
             else:
-                self.__add_token(TokenType.SLASH)
+                self.__add_token(TokenType.SLASH, "/")
         elif char == " " or char == "\r" or char == "\t":
             pass
         elif char == "\n":
