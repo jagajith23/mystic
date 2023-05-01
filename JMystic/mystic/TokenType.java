@@ -18,5 +18,8 @@ enum TokenType {
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
     PRINT, RETURN, PARENT, THIS, TRUE, STORE, WHILE,
 
+    // Ternary.
+    QUESTION, COLON,
+
     EOF
 }

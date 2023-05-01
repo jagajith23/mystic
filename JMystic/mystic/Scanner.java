@@ -112,6 +112,10 @@ public class Scanner {
             } else {
                 addToken(SLASH);
             }
+        else if (c == '?')
+            addToken(QUESTION);
+        else if (c == ':')
+            addToken(COLON);
         else if (c == ' ' || c == '\r' || c == '\t')
             ;
         else if (c == '\n')

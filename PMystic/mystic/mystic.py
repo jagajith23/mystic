@@ -23,6 +23,9 @@ class Mystic:
                 line = input(">>> ")
                 self.__run(line)
                 self.__had_error = False
+            except KeyboardInterrupt:
+                print("Exiting...")
+                break
             except EOFError:
                 break
 
@@ -46,7 +49,7 @@ class Mystic:
         self.__report(line, "", message)
 
     def error_at(self, token: Token, message: str):
-        if token.type == TokenType.EOF:
+        if token.token_type == TokenType.EOF:
             self.__report(token.line, " at end", message)
         else:
             self.__report(token.line, " at '" + token.lexeme + "'", message)

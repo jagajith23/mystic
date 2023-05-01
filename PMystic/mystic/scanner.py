@@ -24,7 +24,7 @@ class Scanner:
 
     def __init__(self, source: str, mystic: object):
         self.__source = source
-        self.mystic = mystic
+        self.__mystic = mystic
         self.__tokens = []
         self.__start = 0
         self.__current = 0
@@ -98,7 +98,7 @@ class Scanner:
                     self.__advance()
 
                 if self.__is_at_end():
-                    self.mystic.error(self.__line, "Unterminated comment.")
+                    self.__mystic.error(self.__line, "Unterminated comment.")
                     return
 
                 # The closing '*/'.
@@ -106,6 +106,10 @@ class Scanner:
                 self.__advance()
             else:
                 self.__add_token(TokenType.SLASH, "/")
+        elif char == "?":
+            self.__add_token(TokenType.QUESTION, "?")
+        elif char == ":":
+            self.__add_token(TokenType.COLON, ":")
         elif char == " " or char == "\r" or char == "\t":
             pass
         elif char == "\n":
@@ -117,7 +121,7 @@ class Scanner:
         elif self.__is_alpha(char):
             self.__identifier()
         else:
-            self.mystic.error(self.__line, "Unexpected character.")
+            self.__mystic.error(self.__line, "Unexpected character.")
 
     def __is_alpha(self, char: str) -> bool:
         return (
@@ -167,7 +171,7 @@ class Scanner:
             self.__advance()
 
         if self.__is_at_end():
-            self.mystic.error(self.__line, "Unterminated string.")
+            self.__mystic.error(self.__line, "Unterminated string.")
             return
 
         # The closing '.

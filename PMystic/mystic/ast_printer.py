@@ -7,6 +7,11 @@ class AstPrinter(Expr.Visitor):
     def print(self, expr: Expr):
         return expr.accept(self)
 
+    def visit_ternary_expr(self, expr: Expr.Ternary):
+        return self.__parenthesize(
+            "?:", expr.condition, expr.true_expr, expr.false_expr
+        )
+
     def visit_binary_expr(self, expr: Expr.Binary):
         return self.__parenthesize(expr.operator.lexeme, expr.left, expr.right)
 

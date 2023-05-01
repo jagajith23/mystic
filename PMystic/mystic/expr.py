@@ -12,6 +12,9 @@ class Expr:
         def visit_unary_expr(self, expr):
             pass
 
+        def visit_ternary_expr(self, expr):
+            pass
+
     def __init__(self):
         self.binary = self.Binary
         self.grouping = self.Grouping
@@ -63,3 +66,12 @@ class Expr:
 
         def accept(self, visitor):
             return visitor.visit_unary_expr(self)
+
+    class Ternary:
+        def __init__(self, condition, true_expr, false_expr):
+            self.condition = condition
+            self.true_expr = true_expr
+            self.false_expr = false_expr
+
+        def accept(self, visitor):
+            return visitor.visit_ternary_expr(self)

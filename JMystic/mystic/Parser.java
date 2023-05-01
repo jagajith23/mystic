@@ -94,7 +94,20 @@ public class Parser {
     }
 
     private Expr expression() {
-        return equality();
+        return ternary();
+    }
+
+    private Expr ternary() {
+        Expr expr = equality();
+
+        if (match(QUESTION)) {
+            Expr left = equality();
+            consume(COLON, "Expect ':' after ternary expression");
+            Expr right = equality();
+            expr = new Expr.Ternary(expr, left, right);
+        }
+
+        return expr;
     }
 
     private Expr equality() {

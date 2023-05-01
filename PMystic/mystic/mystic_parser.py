@@ -48,10 +48,8 @@ class MysticParser:
         return False
 
     def __error(self, token: Token, message: str) -> ParseError:
-        from mystic import Mystic
-
         self.__mystic.error_at(token, message)
-        return ParseError()
+        return self.ParseError()
 
     def __synchronize(self):
         self.__advance()
@@ -81,7 +79,18 @@ class MysticParser:
         raise self.__error(self.__peek(), message)
 
     def __expression(self):
-        return self.__equality()
+        return self.__ternary()
+
+    def __ternary(self):
+        expr = self.__equality()
+
+        if self.__match(TokenType.QUESTION):
+            true_expr = self.__equality()
+            self.__consume(TokenType.COLON, "Expect ':' after expression.")
+            false_expr = self.__equality()
+            expr = Expr.Ternary(expr, true_expr, false_expr)
+
+        return expr
 
     def __equality(self):
         expr = self.__comparison()

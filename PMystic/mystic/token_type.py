@@ -46,6 +46,9 @@ TOKENS = [
     "WHILE",
     # End of file token.
     "EOF",
+    # Ternary operator token.
+    "QUESTION",
+    "COLON",
 ]
 
 
