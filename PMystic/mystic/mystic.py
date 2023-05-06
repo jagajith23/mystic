@@ -2,6 +2,8 @@ import sys
 from scanner import Scanner
 from mystic_parser import MysticParser
 from ast_printer import AstPrinter
+from mystic_interpreter import Interpreter
+from runtime_error import RTE
 from token_type import *
 from token import Token
 
@@ -9,6 +11,8 @@ from token import Token
 class Mystic:
     def __init__(self):
         self.__had_error = False
+        self.__had_runtime_error = False
+        self.interpreter = Interpreter(self)
 
     def __run_file(self, path: str) -> None:
         with open(path, "rb") as file:
@@ -16,6 +20,8 @@ class Mystic:
             self.__run(bytes.decode())
             if self.__had_error:
                 sys.exit(65)
+            if self.__had_runtime_error:
+                sys.exit(70)
 
     def __run_prompt(self) -> None:
         while True:
@@ -39,7 +45,7 @@ class Mystic:
         if self.__had_error:
             return
 
-        print(AstPrinter().print(expression))
+        self.interpreter.interpret(expression)
 
     def __report(self, line: int, where: str, message: str):
         print("[line " + str(line) + "] Error" + where + ": " + message)
@@ -53,6 +59,10 @@ class Mystic:
             self.__report(token.line, " at end", message)
         else:
             self.__report(token.line, " at '" + token.lexeme + "'", message)
+
+    def runtime_error(self, error: RTE):
+        print(error.message + "\n[line " + str(error.token.line) + "]")
+        self.__had_runtime_error = True
 
     def main(self):
         args = sys.argv
