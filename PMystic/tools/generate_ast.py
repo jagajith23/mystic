@@ -7,11 +7,16 @@ class GenerateAst:
         self.define_ast(
             "Expr",
             [
+                "Ternary: Expr condition, Expr true_expr, Expr false_expr",
                 "Binary: Expr left, Token operator, Expr right",
                 "Grouping: Expr expression",
                 "Literal: object value",
                 "Unary: Token operator, Expr right",
             ],
+        )
+
+        self.define_ast(
+            "Stmt", ["Expression: Expr expression", "Print: Expr expression"]
         )
 
     def define_ast(self, base_name: str, types: list):

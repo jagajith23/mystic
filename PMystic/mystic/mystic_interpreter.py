@@ -1,16 +1,17 @@
 from expr import Expr
+from stmt import Stmt
 from token_type import TokenType
 from runtime_error import RTE
 
 
-class Interpreter(Expr.Visitor):
+class Interpreter(Expr.Visitor, Stmt.Visitor):
     def __init__(self, mystic):
         self.__mystic = mystic
 
-    def interpret(self, expr):
+    def interpret(self, statements):
         try:
-            value = self.__evaluate(expr)
-            print(self.__stringify(value))
+            for statement in statements:
+                self.__execute(statement)
         except RTE as e:
             self.__mystic.runtime_error(e)
 
@@ -28,6 +29,9 @@ class Interpreter(Expr.Visitor):
 
     def __evaluate(self, expr):
         return expr.accept(self)
+
+    def __execute(self, statement):
+        statement.accept(self)
 
     def __is_truthy(self, obj):
         if obj is None:
@@ -62,6 +66,15 @@ class Interpreter(Expr.Visitor):
             return
 
         raise RTE(expr.operator, "Operands must be numbers.")
+
+    def visit_expression_stmt(self, stmt):
+        self.__evaluate(stmt.expression)
+        return None
+
+    def visit_print_stmt(self, stmt):
+        value = self.__evaluate(stmt.expression)
+        print(self.__stringify(value))
+        return None
 
     def visit_literal_expr(self, expr):
         return expr.value

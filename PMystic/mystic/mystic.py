@@ -40,12 +40,12 @@ class Mystic:
         tokens = scanner.scan_tokens()
 
         parser = MysticParser(tokens, self)
-        expression = parser.parse()
+        statements = parser.parse()
 
         if self.__had_error:
             return
 
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
     def __report(self, line: int, where: str, message: str):
         print("[line " + str(line) + "] Error" + where + ": " + message)

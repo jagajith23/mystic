@@ -1,5 +1,6 @@
 from token_type import *
 from expr import Expr
+from stmt import Stmt
 from token import Token
 
 
@@ -8,10 +9,10 @@ class MysticParser:
         pass
 
     def parse(self):
-        try:
-            return self.__expression()
-        except self.ParseError:
-            return None
+        statements = []
+        while not self.__is_at_end():
+            statements.append(self.__statement())
+        return statements
 
     def __init__(self, tokens: list, mystic):
         self.__current = 0
@@ -77,6 +78,22 @@ class MysticParser:
             return self.__advance()
 
         raise self.__error(self.__peek(), message)
+
+    def __statement(self):
+        if self.__match(TokenType.PRINT):
+            return self.__print_statement()
+
+        return self.__expression_statement()
+
+    def __print_statement(self):
+        value = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Stmt.Print(value)
+
+    def __expression_statement(self):
+        expr = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return Stmt.Expression(expr)
 
     def __expression(self):
         return self.__ternary()

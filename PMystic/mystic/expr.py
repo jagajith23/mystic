@@ -1,5 +1,8 @@
 class Expr:
     class Visitor:
+        def visit_ternary_expr(self, expr):
+            pass
+
         def visit_binary_expr(self, expr):
             pass
 
@@ -12,14 +15,26 @@ class Expr:
         def visit_unary_expr(self, expr):
             pass
 
-        def visit_ternary_expr(self, expr):
-            pass
-
     def __init__(self):
+        self.ternary = self.Ternary
         self.binary = self.Binary
         self.grouping = self.Grouping
         self.literal = self.Literal
         self.unary = self.Unary
+
+    class Ternary:
+        def __init__(
+            self,
+            condition,
+            true_expr,
+            false_expr,
+        ):
+            self.condition = condition
+            self.true_expr = true_expr
+            self.false_expr = false_expr
+
+        def accept(self, visitor):
+            return visitor.visit_ternary_expr(self)
 
     class Binary:
         def __init__(
@@ -66,12 +81,3 @@ class Expr:
 
         def accept(self, visitor):
             return visitor.visit_unary_expr(self)
-
-    class Ternary:
-        def __init__(self, condition, true_expr, false_expr):
-            self.condition = condition
-            self.true_expr = true_expr
-            self.false_expr = false_expr
-
-        def accept(self, visitor):
-            return visitor.visit_ternary_expr(self)
