@@ -7,16 +7,24 @@ class GenerateAst:
         self.define_ast(
             "Expr",
             [
-                "Ternary: Expr condition, Expr true_expr, Expr false_expr",
-                "Binary: Expr left, Token operator, Expr right",
-                "Grouping: Expr expression",
-                "Literal: object value",
-                "Unary: Token operator, Expr right",
+                "Assign: name, value",
+                "Ternary: condition, true_expr, false_expr",
+                "Binary: left, operator, right",
+                "Grouping: expression",
+                "Literal: value",
+                "Unary: operator, right",
+                "Variable: name",
             ],
         )
 
         self.define_ast(
-            "Stmt", ["Expression: Expr expression", "Print: Expr expression"]
+            "Stmt",
+            [
+                "Block: statements",
+                "Expression: expression",
+                "Print: expression",
+                "Var: name, initializer",
+            ],
         )
 
     def define_ast(self, base_name: str, types: list):
@@ -44,14 +52,13 @@ class GenerateAst:
         writer.write("        def __init__(self, ")
 
         for field in fields:
-            type = field.split(" ")[0].strip()
-            name = field.split(" ")[1].strip()
-            writer.write(name + ": " + type + ", ")
+            name = field.strip()
+            writer.write(name + ", ")
 
         writer.write("):\n")
 
         for field in fields:
-            name = field.split(" ")[1].strip()
+            name = field.strip()
             writer.write("            self." + name + " = " + name + "\n")
 
         writer.write("\n")
@@ -76,8 +83,6 @@ class GenerateAst:
                 + base_name.lower()
                 + "(self, "
                 + base_name.lower()
-                + ": "
-                + type_name
                 + "):\n"
             )
             writer.write("            pass\n")

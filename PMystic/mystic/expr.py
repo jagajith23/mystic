@@ -1,5 +1,8 @@
 class Expr:
     class Visitor:
+        def visit_assign_expr(self, expr):
+            pass
+
         def visit_ternary_expr(self, expr):
             pass
 
@@ -15,12 +18,29 @@ class Expr:
         def visit_unary_expr(self, expr):
             pass
 
+        def visit_variable_expr(self, expr):
+            pass
+
     def __init__(self):
+        self.assign = self.Assign
         self.ternary = self.Ternary
         self.binary = self.Binary
         self.grouping = self.Grouping
         self.literal = self.Literal
         self.unary = self.Unary
+        self.variable = self.Variable
+
+    class Assign:
+        def __init__(
+            self,
+            name,
+            value,
+        ):
+            self.name = name
+            self.value = value
+
+        def accept(self, visitor):
+            return visitor.visit_assign_expr(self)
 
     class Ternary:
         def __init__(
@@ -81,3 +101,13 @@ class Expr:
 
         def accept(self, visitor):
             return visitor.visit_unary_expr(self)
+
+    class Variable:
+        def __init__(
+            self,
+            name,
+        ):
+            self.name = name
+
+        def accept(self, visitor):
+            return visitor.visit_variable_expr(self)

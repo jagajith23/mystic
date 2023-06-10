@@ -3,7 +3,7 @@
 
 // 45 != 6.3;
 
-5 + 6 * 10 - 4;
+print 5 + 6 * 10 - 4;
 
 // {
 //    45 + 9;
@@ -14,3 +14,22 @@
 /* This is a comment
    that spans multiple lines */
 
+store a = "global a";
+store b = "global b";
+store c = "global c";
+{
+  store a = "outer a";
+  store b = "outer b";
+  {
+    store a = "inner a";
+    print a;
+    print b;
+    print c;
+  }
+  print a;
+  print b;
+  print c;
+}
+print a;
+print b;
+print c;

@@ -11,13 +11,15 @@ class MysticParser:
     def parse(self):
         statements = []
         while not self.__is_at_end():
-            statements.append(self.__statement())
+            statements.append(self.__declaration())
         return statements
 
     def __init__(self, tokens: list, mystic):
         self.__current = 0
         self.__tokens = tokens
         self.__mystic = mystic
+
+    # ------- Helper Functions ------- #
 
     def __peek(self) -> Token:
         return self.__tokens[self.__current]
@@ -79,9 +81,50 @@ class MysticParser:
 
         raise self.__error(self.__peek(), message)
 
+    # ------- Grammar Functions ------- #
+
+    """
+    program         → declaration* EOF
+    declaration     → varDecl | statement
+    varDecl         → "store" IDENTIFIER ( "=" expression )?
+    statement       → printStmt | expressionStmt | block
+    printStmt       → "print" expression
+    expressionStmt  → expression
+    expression      → ternary
+    ternary         → equality ( "?" equality ":" equality )?
+    equality        → comparison ( ( "!=" | "==" ) comparison )*
+    comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )*
+    term            → factor ( ( "-" | "+" ) factor )*
+    factor          → unary ( ( "/" | "*" ) unary )*
+    unary           → ( "!" | "-" ) unary | primary
+    primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER
+    """
+
+    def __declaration(self):
+        try:
+            if self.__match(TokenType.STORE):
+                return self.__var_declaration()
+            return self.__statement()
+        except self.ParseError:
+            self.__synchronize()
+            return None
+
+    def __var_declaration(self):
+        name = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        initializer = None
+        if self.__match(TokenType.EQUAL):
+            initializer = self.__expression()
+
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return Stmt.Var(name, initializer)
+
     def __statement(self):
         if self.__match(TokenType.PRINT):
             return self.__print_statement()
+
+        if self.__match(TokenType.LEFT_BRACE):
+            return Stmt.Block(self.__block())
 
         return self.__expression_statement()
 
@@ -95,8 +138,32 @@ class MysticParser:
         self.__consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return Stmt.Expression(expr)
 
+    def __block(self):
+        statements = []
+
+        while not (self.__check(TokenType.RIGHT_BRACE) or self.__is_at_end()):
+            statements.append(self.__declaration())
+
+        self.__consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
+
     def __expression(self):
-        return self.__ternary()
+        return self.__assignment()
+
+    def __assignment(self):
+        expr = self.__ternary()
+
+        if self.__match(TokenType.EQUAL):
+            equals = self.__previous()
+            value = self.__assignment()
+
+            if isinstance(expr, Expr.Variable):
+                name = expr.name
+                return Expr.Assign(name, value)
+
+            self.__error(equals, "Invalid assignment target.")
+
+        return expr
 
     def __ternary(self):
         expr = self.__equality()
@@ -122,7 +189,12 @@ class MysticParser:
     def __comparison(self):
         expr = self.__term()
 
-        while self.__match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL):
+        while self.__match(
+            TokenType.LESS,
+            TokenType.LESS_EQUAL,
+            TokenType.GREATER,
+            TokenType.GREATER_EQUAL,
+        ):
             operator = self.__previous()
             right = self.__term()
             expr = Expr.Binary(expr, operator, right)
@@ -167,6 +239,9 @@ class MysticParser:
 
         if self.__match(TokenType.NUMBER, TokenType.STRING):
             return Expr.Literal(self.__previous().literal)
+
+        if self.__match(TokenType.IDENTIFIER):
+            return Expr.Variable(self.__previous())
 
         if self.__match(TokenType.LEFT_PAREN):
             expr = self.__expression()

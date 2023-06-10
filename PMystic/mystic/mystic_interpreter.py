@@ -2,11 +2,13 @@ from expr import Expr
 from stmt import Stmt
 from token_type import TokenType
 from runtime_error import RTE
+from environment import Environment
 
 
 class Interpreter(Expr.Visitor, Stmt.Visitor):
     def __init__(self, mystic):
         self.__mystic = mystic
+        self.__env = Environment()
 
     def interpret(self, statements):
         try:
@@ -14,6 +16,8 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
                 self.__execute(statement)
         except RTE as e:
             self.__mystic.runtime_error(e)
+
+    # ------- Helper Functions ------- #
 
     def __stringify(self, obj):
         if obj is None:
@@ -30,8 +34,17 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     def __evaluate(self, expr):
         return expr.accept(self)
 
-    def __execute(self, statement):
-        statement.accept(self)
+    def __execute(self, stmt):
+        stmt.accept(self)
+
+    def __execute_block(self, statements, env):
+        previous = self.__env
+        try:
+            self.__env = env
+            for statement in statements:
+                self.__execute(statement)
+        finally:
+            self.__env = previous
 
     def __is_truthy(self, obj):
         if obj is None:
@@ -67,6 +80,12 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
         raise RTE(expr.operator, "Operands must be numbers.")
 
+    # ------- Visitor Functions ------- #
+
+    def visit_block_stmt(self, stmt):
+        self.__execute_block(stmt.statements, Environment(self.__env))
+        return None
+
     def visit_expression_stmt(self, stmt):
         self.__evaluate(stmt.expression)
         return None
@@ -76,22 +95,33 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         print(self.__stringify(value))
         return None
 
+    def visit_var_stmt(self, stmt):
+        value = None
+        if stmt.initializer != None:
+            value = self.__evaluate(stmt.initializer)
+        self.__env.define(stmt.name.lexeme, value)
+        return None
+
+    def visit_assign_expr(self, expr):
+        value = self.__evaluate(expr.value)
+        self.__env.assign(expr.name, value)
+        return value
+
+    def visit_variable_expr(self, expr):
+        return self.__env.get(expr.name)
+
     def visit_literal_expr(self, expr):
         return expr.value
 
     def visit_grouping_expr(self, expr):
         return self.__evaluate(expr.expression)
 
-    def visit_unary_expr(self, expr):
-        right = self.__evaluate(expr.right)
+    def visit_ternary_expr(self, expr):
+        condition = self.__evaluate(expr.condition)
 
-        if expr.operator.token_type == TokenType.MINUS:
-            self.__check_number_operand(expr.operator, right)
-            return -right
-        elif expr.operator.token_type == TokenType.BANG:
-            return not self.__is_truthy(right)
-
-        return None
+        if self.__is_truthy(condition):
+            return self.__evaluate(expr.true_expr)
+        return self.__evaluate(expr.false_expr)
 
     def visit_binary_expr(self, expr):
         left = self.__evaluate(expr.left)
@@ -138,10 +168,13 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
         return None
 
-    def visit_ternary_expr(self, expr):
-        condition = self.__evaluate(expr.condition)
+    def visit_unary_expr(self, expr):
+        right = self.__evaluate(expr.right)
 
-        if self.__is_truthy(condition):
-            return self.__evaluate(expr.left)
-        else:
-            return self.__evaluate(expr.right)
+        if expr.operator.token_type == TokenType.MINUS:
+            self.__check_number_operand(expr.operator, right)
+            return -right
+        elif expr.operator.token_type == TokenType.BANG:
+            return not self.__is_truthy(right)
+
+        return None
