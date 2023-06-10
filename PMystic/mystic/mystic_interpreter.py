@@ -87,7 +87,8 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         return None
 
     def visit_expression_stmt(self, stmt):
-        self.__evaluate(stmt.expression)
+        value = self.__evaluate(stmt.expression)
+        print(self.__stringify(value))
         return None
 
     def visit_print_stmt(self, stmt):

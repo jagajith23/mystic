@@ -45,8 +45,10 @@ public class Mystic {
             String line;
             try {
                 line = reader.readLine();
-                if (line == null)
+                if (line == null) {
+                    System.out.println("Exiting...");
                     break;
+                }
                 run(line);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
