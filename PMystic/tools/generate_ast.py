@@ -12,6 +12,7 @@ class GenerateAst:
                 "Binary: left, operator, right",
                 "Grouping: expression",
                 "Literal: value",
+                "Logical: left, operator, right",
                 "Unary: operator, right",
                 "Variable: name",
             ],
@@ -22,7 +23,7 @@ class GenerateAst:
             [
                 "Block: statements",
                 "Expression: expression",
-                "Print: expression",
+                "If: condition, then_branch, else_branch" "Print: expression",
                 "Var: name, initializer",
             ],
         )

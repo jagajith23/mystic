@@ -103,11 +103,15 @@ public class Parser {
      * program → declaration* EOF
      * declaration → varDecl | statement
      * varDecl → "store" IDENTIFIER ( "=" expression )?
-     * statement → printStmt | expressionStmt | block
+     * statement → printStmt | expressionStmt | block | ifStmt
+     * ifStmt → "if" "(" expression ")" statement ( "else" statement )?
      * block → "{" declaration* "}"
      * printStmt → "print" expression
      * expressionStmt → expression
-     * expression → ternary
+     * expression → assignment
+     * assignment → IDENTIFIER "=" assignment | logic_or
+     * logic_or → logic_and ( "or" logic_and )*
+     * logic_and → ternary ( "and" ternary )*
      * ternary → equality ( "?" equality ":" equality )?
      * equality → comparison ( ( "!=" | "==" ) comparison )*
      * comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )*
@@ -142,12 +146,29 @@ public class Parser {
     }
 
     private Stmt statement() {
+        if (match(IF))
+            return ifStatement();
         if (match(PRINT))
             return printStatement();
         if (match(LEFT_BRACE))
             return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt ifStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private Stmt printStatement() {
@@ -178,7 +199,7 @@ public class Parser {
     }
 
     private Expr assignment() {
-        Expr expr = ternary();
+        Expr expr = or();
 
         if (match(EQUAL)) {
             Token equals = previous();
@@ -190,6 +211,30 @@ public class Parser {
             }
 
             error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private Expr or() {
+        Expr expr = and();
+
+        if (match(OR)) {
+            Token operator = previous();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr and() {
+        Expr expr = ternary();
+
+        if (match(AND)) {
+            Token operator = previous();
+            Expr right = ternary();
+            expr = new Expr.Logical(expr, operator, right);
         }
 
         return expr;

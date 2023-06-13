@@ -91,6 +91,13 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         print(self.__stringify(value))
         return None
 
+    def visit_if_stmt(self, stmt):
+        if self.__is_truthy(self.__evaluate(stmt.condition)):
+            self.__execute(stmt.then_branch)
+        elif stmt.else_branch != None:
+            self.__execute(stmt.else_branch)
+        return None
+
     def visit_print_stmt(self, stmt):
         value = self.__evaluate(stmt.expression)
         print(self.__stringify(value))
@@ -109,10 +116,35 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         return value
 
     def visit_variable_expr(self, expr):
-        return self.__env.get(expr.name)
+        value = self.__env.get(expr.name)
+
+        if value is None:
+            raise RTE(
+                expr.name,
+                "Undefined variable '"
+                + expr.name.lexeme
+                + "'"
+                + "at line "
+                + str(expr.name.line)
+                + ".",
+            )
+
+        return value
 
     def visit_literal_expr(self, expr):
         return expr.value
+
+    def visit_logical_expr(self, expr):
+        left = self.__evaluate(expr.left)
+
+        if expr.operator.token_type == TokenType.OR:
+            if self.__is_truthy(left):
+                return left
+        else:
+            if not self.__is_truthy(left):
+                return left
+
+        return self.__evaluate(expr.right)
 
     def visit_grouping_expr(self, expr):
         return self.__evaluate(expr.expression)

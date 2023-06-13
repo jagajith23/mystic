@@ -90,7 +90,10 @@ class MysticParser:
     statement       → printStmt | expressionStmt | block
     printStmt       → "print" expression
     expressionStmt  → expression
-    expression      → ternary
+    expression      → assignment
+    assignment      → IDENTIFIER "=" assignment | logic_or
+    logic_or        → logic_and ( "or" logic_and )*
+    logic_and       → ternary ( "and" ternary )*
     ternary         → equality ( "?" equality ":" equality )?
     equality        → comparison ( ( "!=" | "==" ) comparison )*
     comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )*
@@ -128,15 +131,28 @@ class MysticParser:
 
         return self.__expression_statement()
 
-    def __print_statement(self):
-        value = self.__expression()
-        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
-        return Stmt.Print(value)
-
     def __expression_statement(self):
         expr = self.__expression()
         self.__consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return Stmt.Expression(expr)
+
+    def __if_statement(self):
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.__expression()
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch = self.__statement()
+        else_branch = None
+
+        if self.__match(TokenType.ELSE):
+            else_branch = self.__statement()
+
+        return Stmt.If(condition, then_branch, else_branch)
+
+    def __print_statement(self):
+        value = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Stmt.Print(value)
 
     def __block(self):
         statements = []
@@ -151,7 +167,7 @@ class MysticParser:
         return self.__assignment()
 
     def __assignment(self):
-        expr = self.__ternary()
+        expr = self.__or()
 
         if self.__match(TokenType.EQUAL):
             equals = self.__previous()
@@ -162,6 +178,26 @@ class MysticParser:
                 return Expr.Assign(name, value)
 
             self.__error(equals, "Invalid assignment target.")
+
+        return expr
+
+    def __or(self):
+        expr = self.__and()
+
+        if self.__match(TokenType.OR):
+            operator = self.__previous()
+            right = self.__and()
+            expr = Expr.Logical(expr, operator, right)
+
+        return expr
+
+    def __and(self):
+        expr = self.__ternary()
+
+        if self.__match(TokenType.AND):
+            operator = self.__previous()
+            right = self.__ternary()
+            expr = Expr.Logical(expr, operator, right)
 
         return expr
 
