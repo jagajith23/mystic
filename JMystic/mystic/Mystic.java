@@ -11,6 +11,7 @@ import java.util.List;
 public class Mystic {
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
+    static boolean isRepl = false;
     private static final Interpreter interpreter = new Interpreter();
 
     public static void main(String[] args) throws IOException {
@@ -37,6 +38,8 @@ public class Mystic {
     }
 
     private static void runPrompt() {
+        isRepl = true;
+
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 

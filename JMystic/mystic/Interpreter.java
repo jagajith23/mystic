@@ -113,16 +113,26 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         Object value = evaluate(stmt.expression);
-        System.out.println(stringify(value));
+        if (Mystic.isRepl)
+            if (value != null)
+                System.out.println(stringify(value));
         return null;
     }
 
     @Override
-    public Void visitIfStmt(Stmt.If Stmt) {
-        if (isTruthy(evaluate(Stmt.condition))) {
-            execute(Stmt.thenBranch);
-        } else if (Stmt.elseBranch != null) {
-            execute(Stmt.elseBranch);
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body);
         }
         return null;
     }

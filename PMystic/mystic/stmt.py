@@ -2,34 +2,57 @@ class Stmt:
     class Visitor:
         def visit_block_stmt(self, stmt):
             pass
+
         def visit_expression_stmt(self, stmt):
             pass
+
         def visit_if_stmt(self, stmt):
             pass
+
+        def visit_print_stmt(self, stmt):
+            pass
+
         def visit_var_stmt(self, stmt):
             pass
+
+        def visit_while_stmt(self, stmt):
+            pass
+
     def __init__(self):
         self.block = self.Block
         self.expression = self.Expression
-        self.if = self.If
+        self._if = self.If
+        self.print = self.Print
         self.var = self.Var
+        self._while = self.While
 
     class Block:
-        def __init__(self, statements, ):
+        def __init__(
+            self,
+            statements,
+        ):
             self.statements = statements
 
         def accept(self, visitor):
             return visitor.visit_block_stmt(self)
 
     class Expression:
-        def __init__(self, expression, ):
+        def __init__(
+            self,
+            expression,
+        ):
             self.expression = expression
 
         def accept(self, visitor):
             return visitor.visit_expression_stmt(self)
 
     class If:
-        def __init__(self, condition, then_branch, else_branchPrint, ):
+        def __init__(
+            self,
+            condition,
+            then_branch,
+            else_branchPrint,
+        ):
             self.condition = condition
             self.then_branch = then_branch
             self.else_branchPrint = else_branchPrint
@@ -37,11 +60,36 @@ class Stmt:
         def accept(self, visitor):
             return visitor.visit_if_stmt(self)
 
+    class Print:
+        def __init__(
+            self,
+            expression,
+        ):
+            self.expression = expression
+
+        def accept(self, visitor):
+            return visitor.visit_print_stmt(self)
+
     class Var:
-        def __init__(self, name, initializer, ):
+        def __init__(
+            self,
+            name,
+            initializer,
+        ):
             self.name = name
             self.initializer = initializer
 
         def accept(self, visitor):
             return visitor.visit_var_stmt(self)
 
+    class While:
+        def __init__(
+            self,
+            condition,
+            body,
+        ):
+            self.condition = condition
+            self.body = body
+
+        def accept(self, visitor):
+            return visitor.visit_while_stmt(self)

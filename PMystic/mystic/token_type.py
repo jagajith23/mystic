@@ -44,6 +44,8 @@ TOKENS = [
     "TRUE",
     "STORE",
     "WHILE",
+    "BREAK",
+    "CONTINUE",
     # End of file token.
     "EOF",
     # Ternary operator token.

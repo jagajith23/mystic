@@ -16,7 +16,8 @@ enum TokenType {
 
     // Keywords.
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-    PRINT, RETURN, PARENT, THIS, TRUE, STORE, WHILE,
+    PRINT, RETURN, PARENT, THIS, TRUE, STORE, WHILE, BREAK,
+    CONTINUE,
 
     // Ternary.
     QUESTION, COLON,

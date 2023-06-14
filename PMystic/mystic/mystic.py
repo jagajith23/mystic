@@ -13,6 +13,7 @@ class Mystic:
         self.__had_error = False
         self.__had_runtime_error = False
         self.interpreter = Interpreter(self)
+        self.is_repl = False
 
     def __run_file(self, path: str) -> None:
         with open(path, "rb") as file:
@@ -24,6 +25,7 @@ class Mystic:
                 sys.exit(70)
 
     def __run_prompt(self) -> None:
+        self.is_repl = True
         while True:
             try:
                 line = input(">>> ")

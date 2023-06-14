@@ -7,24 +7,26 @@ class GenerateAst:
         self.define_ast(
             "Expr",
             [
-                "Assign: name, value",
-                "Ternary: condition, true_expr, false_expr",
-                "Binary: left, operator, right",
-                "Grouping: expression",
-                "Literal: value",
-                "Logical: left, operator, right",
-                "Unary: operator, right",
-                "Variable: name",
+                "Assign   : name, value",
+                "Ternary  : condition, true_expr, false_expr",
+                "Binary   : left, operator, right",
+                "Grouping : expression",
+                "Literal  : value",
+                "Logical  : left, operator, right",
+                "Unary    : operator, right",
+                "Variable : name",
             ],
         )
 
         self.define_ast(
             "Stmt",
             [
-                "Block: statements",
-                "Expression: expression",
-                "If: condition, then_branch, else_branch" "Print: expression",
-                "Var: name, initializer",
+                "Block       : statements",
+                "Expression  : expression",
+                "If          : condition, then_branch, else_branch" "Print: expression",
+                "Print       : expression",
+                "Var         : name, initializer",
+                "While       : condition, body",
             ],
         )
 

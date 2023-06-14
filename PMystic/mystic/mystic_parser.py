@@ -87,7 +87,9 @@ class MysticParser:
     program         → declaration* EOF
     declaration     → varDecl | statement
     varDecl         → "store" IDENTIFIER ( "=" expression )?
-    statement       → printStmt | expressionStmt | block
+    statement       → printStmt | expressionStmt | block | ifStmt | whileStmt | forStmt
+    whileStmt       → "while" "(" expression ")" statement
+    forStmt         → "for" "(" ( varDecl | expressionStmt | ";" ) expression? ";" expression? ")" statement
     printStmt       → "print" expression
     expressionStmt  → expression
     expression      → assignment
@@ -123,6 +125,15 @@ class MysticParser:
         return Stmt.Var(name, initializer)
 
     def __statement(self):
+        if self.__match(TokenType.IF):
+            return self.__if_statement()
+
+        if self.__match(TokenType.WHILE):
+            return self.__while_statement()
+
+        if self.__match(TokenType.FOR):
+            return self.__for_statement()
+
         if self.__match(TokenType.PRINT):
             return self.__print_statement()
 
@@ -148,6 +159,50 @@ class MysticParser:
             else_branch = self.__statement()
 
         return Stmt.If(condition, then_branch, else_branch)
+
+    def __while_statement(self):
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self.__expression()
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+
+        body = self.__statement()
+
+        return Stmt.While(condition, body)
+
+    def __for_statement(self):
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+        initializer = None
+        if self.__match(TokenType.SEMICOLON):
+            initializer = None
+        elif self.__match(TokenType.STORE):
+            initializer = self.__var_declaration()
+        else:
+            initializer = self.__expression_statement()
+
+        condition = None
+        if not self.__match(TokenType.SEMICOLON):
+            condition = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+        increment = None
+        if not self.__match(TokenType.RIGHT_PAREN):
+            increment = self.__expression()
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        body = self.__statement()
+
+        if increment is not None:
+            body = Stmt.Block([body, Stmt.Expression(increment)])
+
+        if condition is None:
+            condition = Expr.Literal(True)
+        body = Stmt.While(condition, body)
+
+        if initializer is not None:
+            body = Stmt.Block([initializer, body])
+
+        return body
 
     def __print_statement(self):
         value = self.__expression()

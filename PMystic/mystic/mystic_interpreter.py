@@ -88,7 +88,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
     def visit_expression_stmt(self, stmt):
         value = self.__evaluate(stmt.expression)
-        print(self.__stringify(value))
+        if self.__mystic.is_repl:
+            if value is not None:
+                print(self.__stringify(value))
         return None
 
     def visit_if_stmt(self, stmt):
@@ -96,6 +98,11 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             self.__execute(stmt.then_branch)
         elif stmt.else_branch != None:
             self.__execute(stmt.else_branch)
+        return None
+
+    def visit_while_stmt(self, stmt):
+        while self.__is_truthy(self.__evaluate(stmt.condition)):
+            self.__execute(stmt.body)
         return None
 
     def visit_print_stmt(self, stmt):

@@ -15,7 +15,7 @@ class Environment:
 
         raise RTE(name, f"Undefined variable '{name.lexeme}'.")
 
-    def __assign(self, name, value):
+    def assign(self, name, value):
         if name.lexeme in self.__values:
             self.__values[name.lexeme] = value
             return
