@@ -11,6 +11,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private static class BreakException extends RuntimeException {
     }
 
+    private static class ContinueException extends RuntimeException {
+    }
+
     void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
@@ -138,6 +141,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitContinueStmt(Stmt.Continue stmt) {
+        throw new ContinueException();
+    }
+
+    @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         try {
             while (isTruthy(evaluate(stmt.condition))) {
@@ -145,6 +153,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             }
         } catch (BreakException e) {
             // Eat 5 star, do nothing
+        } catch (ContinueException e) {
+            visitWhileStmt(stmt);
         }
         return null;
     }

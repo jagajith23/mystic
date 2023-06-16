@@ -106,6 +106,9 @@ public class Parser {
      * declaration → varDecl | statement
      * varDecl → "store" IDENTIFIER ( "=" expression )?
      * statement → printStmt | expressionStmt | block | ifStmt | whileStmt | forStmt
+     * | breakStmt | continueStmt
+     * breakStmt → "break" ";"
+     * continueStmt → "continue" ";"
      * forStmt → "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression?
      * ")" statement
      * whileStmt → "while" "(" expression ")" statement
@@ -155,6 +158,8 @@ public class Parser {
             return ifStatement();
         if (match(BREAK))
             return breakStatement();
+        if (match(CONTINUE))
+            return continueStatement();
         if (match(WHILE))
             return whileStatement();
         if (match(FOR))
@@ -188,6 +193,14 @@ public class Parser {
 
         consume(SEMICOLON, "Expect ';' after break statement.");
         return new Stmt.Break();
+    }
+
+    private Stmt continueStatement() {
+        if (loopDepth == 0)
+            throw error(previous(), "Must be inside a loop to use 'continue'.");
+
+        consume(SEMICOLON, "Expect ';' after continue statement.");
+        return new Stmt.Continue();
     }
 
     private Stmt whileStatement() {

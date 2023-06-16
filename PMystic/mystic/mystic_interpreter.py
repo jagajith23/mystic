@@ -9,6 +9,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     class BreakException(RTE):
         pass
 
+    class ContinueException(RTE):
+        pass
+
     def __init__(self, mystic):
         self.__mystic = mystic
         self.__env = Environment()
@@ -106,6 +109,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     def visit_break_stmt(self, stmt):
         raise self.BreakException("break", "Break statement.")
 
+    def visit_continue_stmt(self, stmt):
+        raise self.ContinueException("continue", "Continue statement.")
+
     def visit_while_stmt(self, stmt):
         try:
             while self.__is_truthy(self.__evaluate(stmt.condition)):
@@ -113,6 +119,8 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         except self.BreakException:
             # Eat 5 star, do nothing
             pass
+        except self.ContinueException:
+            self.visit_while_stmt(stmt)
         return None
 
     def visit_print_stmt(self, stmt):

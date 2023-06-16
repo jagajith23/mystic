@@ -38,6 +38,7 @@ public class Scanner {
         keywords.put("store", STORE);
         keywords.put("while", WHILE);
         keywords.put("break", BREAK);
+        keywords.put("continue", CONTINUE);
     }
 
     Scanner(String source) {

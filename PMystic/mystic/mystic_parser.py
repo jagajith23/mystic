@@ -132,6 +132,9 @@ class MysticParser:
         if self.__match(TokenType.BREAK):
             return self.__break_statement()
 
+        if self.__match(TokenType.CONTINUE):
+            return self.__continue_statement()
+
         if self.__match(TokenType.WHILE):
             return self.__while_statement()
 
@@ -169,6 +172,12 @@ class MysticParser:
             self.__error(self.__previous(), "Cannot use 'break' outside of a loop.")
         self.__consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
         return Stmt.Break()
+
+    def __continue_statement(self):
+        if self.__loop_depth == 0:
+            self.__error(self.__previous(), "Cannot use 'continue' outside of a loop.")
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after 'continue'.")
+        return Stmt.Continue()
 
     def __while_statement(self):
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")

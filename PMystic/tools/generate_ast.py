@@ -23,9 +23,9 @@ class GenerateAst:
             [
                 "Block       : statements",
                 "Break       : ",
+                "Continue    : ",
                 "Expression  : expression",
                 "If          : condition, then_branch, else_branch",
-                "Print       : expression",
                 "Print       : expression",
                 "Var         : name, initializer",
                 "While       : condition, body",

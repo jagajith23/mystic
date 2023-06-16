@@ -21,6 +21,7 @@ class Scanner:
         "store": TokenType.STORE,
         "while": TokenType.WHILE,
         "break": TokenType.BREAK,
+        "continue": TokenType.CONTINUE,
     }
 
     def __init__(self, source: str, mystic: object):
