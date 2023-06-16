@@ -24,6 +24,7 @@ public class Parser {
 
     private final List<Token> tokens;
     private int current = 0;
+    private int loopDepth = 0;
 
     Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -152,6 +153,8 @@ public class Parser {
     private Stmt statement() {
         if (match(IF))
             return ifStatement();
+        if (match(BREAK))
+            return breakStatement();
         if (match(WHILE))
             return whileStatement();
         if (match(FOR))
@@ -179,14 +182,27 @@ public class Parser {
         return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
+    private Stmt breakStatement() {
+        if (loopDepth == 0)
+            throw error(previous(), "Must be inside a loop to use 'break'.");
+
+        consume(SEMICOLON, "Expect ';' after break statement.");
+        return new Stmt.Break();
+    }
+
     private Stmt whileStatement() {
         consume(LEFT_PAREN, "Expect '(' after 'while'.");
         Expr condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after while condition.");
 
-        Stmt body = statement();
+        try {
+            loopDepth++;
+            Stmt body = statement();
 
-        return new Stmt.While(condition, body);
+            return new Stmt.While(condition, body);
+        } finally {
+            loopDepth--;
+        }
     }
 
     private Stmt forStatement() {
@@ -213,21 +229,26 @@ public class Parser {
         }
         consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
-        Stmt body = statement();
+        try {
+            loopDepth++;
+            Stmt body = statement();
 
-        if (increment != null) {
-            body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
+            if (increment != null) {
+                body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
+            }
+
+            if (condition == null)
+                condition = new Expr.Literal(true);
+            body = new Stmt.While(condition, body);
+
+            if (initializer != null) {
+                body = new Stmt.Block(Arrays.asList(initializer, body));
+            }
+
+            return body;
+        } finally {
+            loopDepth--;
         }
-
-        if (condition == null)
-            condition = new Expr.Literal(true);
-        body = new Stmt.While(condition, body);
-
-        if (initializer != null) {
-            body = new Stmt.Block(Arrays.asList(initializer, body));
-        }
-
-        return body;
     }
 
     private Stmt printStatement() {

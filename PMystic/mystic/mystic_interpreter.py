@@ -6,6 +6,9 @@ from environment import Environment
 
 
 class Interpreter(Expr.Visitor, Stmt.Visitor):
+    class BreakException(RTE):
+        pass
+
     def __init__(self, mystic):
         self.__mystic = mystic
         self.__env = Environment()
@@ -100,9 +103,16 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             self.__execute(stmt.else_branch)
         return None
 
+    def visit_break_stmt(self, stmt):
+        raise self.BreakException("break", "Break statement.")
+
     def visit_while_stmt(self, stmt):
-        while self.__is_truthy(self.__evaluate(stmt.condition)):
-            self.__execute(stmt.body)
+        try:
+            while self.__is_truthy(self.__evaluate(stmt.condition)):
+                self.__execute(stmt.body)
+        except self.BreakException:
+            # Eat 5 star, do nothing
+            pass
         return None
 
     def visit_print_stmt(self, stmt):

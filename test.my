@@ -43,7 +43,8 @@ b = 1;
 print "Entering for loop";
 for (a = 0; a < 10000; a = a + 1000) {
   if (a == 5000) {
-    print "a is 5000";
+    // print "a is 5000";
+    break;
   } else {
     print "a is not 5000";
   }

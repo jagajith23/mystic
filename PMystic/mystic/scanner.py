@@ -1,5 +1,5 @@
 from token_type import *
-from token import Token
+from mystic_token import Token
 
 
 class Scanner:
@@ -20,6 +20,7 @@ class Scanner:
         "true": TokenType.TRUE,
         "store": TokenType.STORE,
         "while": TokenType.WHILE,
+        "break": TokenType.BREAK,
     }
 
     def __init__(self, source: str, mystic: object):

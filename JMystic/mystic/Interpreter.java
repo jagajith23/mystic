@@ -8,6 +8,9 @@ import java.util.List;
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Environment env = new Environment();
 
+    private static class BreakException extends RuntimeException {
+    }
+
     void interpret(List<Stmt> statements) {
         try {
             for (Stmt statement : statements) {
@@ -130,9 +133,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        throw new BreakException();
+    }
+
+    @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        while (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
+        try {
+            while (isTruthy(evaluate(stmt.condition))) {
+                execute(stmt.body);
+            }
+        } catch (BreakException e) {
+            // Eat 5 star, do nothing
         }
         return null;
     }

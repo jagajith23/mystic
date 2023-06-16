@@ -17,14 +17,14 @@ class Expr:
         def visit_variable_expr(self, expr):
             pass
     def __init__(self):
-        self.assign = self.Assign
-        self.ternary = self.Ternary
-        self.binary = self.Binary
-        self.grouping = self.Grouping
-        self.literal = self.Literal
-        self.logical = self.Logical
-        self.unary = self.Unary
-        self.variable = self.Variable
+        self._assign = self.Assign
+        self._ternary = self.Ternary
+        self._binary = self.Binary
+        self._grouping = self.Grouping
+        self._literal = self.Literal
+        self._logical = self.Logical
+        self._unary = self.Unary
+        self._variable = self.Variable
 
     class Assign:
         def __init__(self, name, value, ):

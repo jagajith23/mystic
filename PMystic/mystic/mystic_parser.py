@@ -1,7 +1,7 @@
 from token_type import *
 from expr import Expr
 from stmt import Stmt
-from token import Token
+from mystic_token import Token
 
 
 class MysticParser:
@@ -16,6 +16,7 @@ class MysticParser:
 
     def __init__(self, tokens: list, mystic):
         self.__current = 0
+        self.__loop_depth = 0
         self.__tokens = tokens
         self.__mystic = mystic
 
@@ -128,6 +129,9 @@ class MysticParser:
         if self.__match(TokenType.IF):
             return self.__if_statement()
 
+        if self.__match(TokenType.BREAK):
+            return self.__break_statement()
+
         if self.__match(TokenType.WHILE):
             return self.__while_statement()
 
@@ -160,14 +164,24 @@ class MysticParser:
 
         return Stmt.If(condition, then_branch, else_branch)
 
+    def __break_statement(self):
+        if self.__loop_depth == 0:
+            self.__error(self.__previous(), "Cannot use 'break' outside of a loop.")
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
+        return Stmt.Break()
+
     def __while_statement(self):
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
         condition = self.__expression()
         self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
 
-        body = self.__statement()
+        try:
+            self.__loop_depth += 1
+            body = self.__statement()
 
-        return Stmt.While(condition, body)
+            return Stmt.While(condition, body)
+        finally:
+            self.__loop_depth -= 1
 
     def __for_statement(self):
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
@@ -190,19 +204,23 @@ class MysticParser:
             increment = self.__expression()
         self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
 
-        body = self.__statement()
+        try:
+            self.__loop_depth += 1
+            body = self.__statement()
 
-        if increment is not None:
-            body = Stmt.Block([body, Stmt.Expression(increment)])
+            if increment is not None:
+                body = Stmt.Block([body, Stmt.Expression(increment)])
 
-        if condition is None:
-            condition = Expr.Literal(True)
-        body = Stmt.While(condition, body)
+            if condition is None:
+                condition = Expr.Literal(True)
+            body = Stmt.While(condition, body)
 
-        if initializer is not None:
-            body = Stmt.Block([initializer, body])
+            if initializer is not None:
+                body = Stmt.Block([initializer, body])
 
-        return body
+            return body
+        finally:
+            self.__loop_depth -= 1
 
     def __print_statement(self):
         value = self.__expression()

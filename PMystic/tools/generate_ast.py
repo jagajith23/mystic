@@ -22,8 +22,10 @@ class GenerateAst:
             "Stmt",
             [
                 "Block       : statements",
+                "Break       : ",
                 "Expression  : expression",
-                "If          : condition, then_branch, else_branch" "Print: expression",
+                "If          : condition, then_branch, else_branch",
+                "Print       : expression",
                 "Print       : expression",
                 "Var         : name, initializer",
                 "While       : condition, body",
@@ -40,7 +42,7 @@ class GenerateAst:
         for type in types:
             class_name = type.split(":")[0].strip()
             writer.write(
-                "        self." + class_name.lower() + " = self." + class_name + "\n"
+                "        self._" + class_name.lower() + " = self." + class_name + "\n"
             )
         writer.write("\n")
 
@@ -51,20 +53,22 @@ class GenerateAst:
 
     def define_type(self, writer, base_name, class_name, field_list):
         writer.write("    class " + class_name + ":\n")
-        fields = field_list.split(", ")
-        writer.write("        def __init__(self, ")
 
-        for field in fields:
-            name = field.strip()
-            writer.write(name + ", ")
+        if field_list != "":
+            fields = field_list.split(", ")
+            writer.write("        def __init__(self, ")
 
-        writer.write("):\n")
+            for field in fields:
+                name = field.strip()
+                writer.write(name + ", ")
 
-        for field in fields:
-            name = field.strip()
-            writer.write("            self." + name + " = " + name + "\n")
+            writer.write("):\n")
 
-        writer.write("\n")
+            for field in fields:
+                name = field.strip()
+                writer.write("            self." + name + " = " + name + "\n")
+
+            writer.write("\n")
 
         writer.write("        def accept(self, visitor):\n")
         writer.write(

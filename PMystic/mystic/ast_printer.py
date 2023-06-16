@@ -1,5 +1,5 @@
 from expr import Expr
-from token import Token
+from mystic_token import Token
 from token_type import TokenType
 
 
