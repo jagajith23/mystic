@@ -6,6 +6,8 @@ class Expr:
             pass
         def visit_binary_expr(self, expr):
             pass
+        def visit_call_expr(self, expr):
+            pass
         def visit_grouping_expr(self, expr):
             pass
         def visit_literal_expr(self, expr):
@@ -20,6 +22,7 @@ class Expr:
         self._assign = self.Assign
         self._ternary = self.Ternary
         self._binary = self.Binary
+        self._call = self.Call
         self._grouping = self.Grouping
         self._literal = self.Literal
         self._logical = self.Logical
@@ -51,6 +54,15 @@ class Expr:
 
         def accept(self, visitor):
             return visitor.visit_binary_expr(self)
+
+    class Call:
+        def __init__(self, callee, paren, arguments, ):
+            self.callee = callee
+            self.paren = paren
+            self.arguments = arguments
+
+        def accept(self, visitor):
+            return visitor.visit_call_expr(self)
 
     class Grouping:
         def __init__(self, expression, ):

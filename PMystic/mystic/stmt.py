@@ -12,10 +12,16 @@ class Stmt:
         def visit_expression_stmt(self, stmt):
             pass
 
+        def visit_function_stmt(self, stmt):
+            pass
+
         def visit_if_stmt(self, stmt):
             pass
 
         def visit_print_stmt(self, stmt):
+            pass
+
+        def visit_return_stmt(self, stmt):
             pass
 
         def visit_var_stmt(self, stmt):
@@ -29,8 +35,10 @@ class Stmt:
         self._break = self.Break
         self._continue = self.Continue
         self._expression = self.Expression
+        self._function = self.Function
         self._if = self.If
         self._print = self.Print
+        self._return = self.Return
         self._var = self.Var
         self._while = self.While
 
@@ -62,6 +70,20 @@ class Stmt:
         def accept(self, visitor):
             return visitor.visit_expression_stmt(self)
 
+    class Function:
+        def __init__(
+            self,
+            name,
+            params,
+            body,
+        ):
+            self.name = name
+            self.params = params
+            self.body = body
+
+        def accept(self, visitor):
+            return visitor.visit_function_stmt(self)
+
     class If:
         def __init__(
             self,
@@ -85,6 +107,18 @@ class Stmt:
 
         def accept(self, visitor):
             return visitor.visit_print_stmt(self)
+
+    class Return:
+        def __init__(
+            self,
+            keyword,
+            value,
+        ):
+            self.keyword = keyword
+            self.value = value
+
+        def accept(self, visitor):
+            return visitor.visit_return_stmt(self)
 
     class Var:
         def __init__(

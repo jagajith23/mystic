@@ -3,7 +3,7 @@
 
 // 45 != 6.3;
 
-print 5 + 6 * 10 - 4;
+// print 5 + 6 * 10 - 4;
 
 // {
 //    45 + 9;
@@ -14,47 +14,77 @@ print 5 + 6 * 10 - 4;
 /* This is a comment
    that spans multiple lines */
 
-store a = "global a";
-store b = "global b";
-store c = "global c";
-{
-  store a = "outer a";
-  store b = "outer b";
-  {
-    store a = "inner a";
-    print a;
-    print b;
-    print c;
+
+// store a = "global a";
+// store b = "global b";
+// store c = "global c";
+// {
+//   store a = "outer a";
+//   store b = "outer b";
+//   {
+//     store a = "inner a";
+//     print a;
+//     print b;
+//     print c;
+//   }
+//   print a;
+//   print b;
+//   print c;
+// }
+// print a;
+// print b;
+// print c;
+// 
+// store a;
+// store b;
+// 
+// a = 0;
+// b = 1;
+// 
+// print "Entering for loop";
+// for (a = 0; a < 10000; a = a + 1000) {
+//   if (a == 5000) {
+//     // print "a is 5000";
+//     break;
+//   } else {
+//     print "a is not 5000";
+//   }
+// }
+// 
+// print "Entering while loop";
+// while (a > 0) {
+//   a = a - 1000;
+//   if (a == 3000) {
+//     continue;
+//   }
+//   print a;
+// }
+
+//fun sayHi(first, last) {
+//  print "Hi, " + first + " " + last + "!";
+//}
+
+//sayHi("Dear", "Reader");
+
+//fun fib(n) {
+//  if (n <= 1) return n;
+//  return fib(n - 2) + fib(n - 1);
+//}
+//
+//for (store i = 0; i < 20; i = i + 1) {
+//  print fib(i);
+//}
+
+fun makeCounter() {
+  store i = 0;
+  fun count() {
+    i = i + 1;
+    print i;
   }
-  print a;
-  print b;
-  print c;
-}
-print a;
-print b;
-print c;
 
-store a;
-store b;
-
-a = 0;
-b = 1;
-
-print "Entering for loop";
-for (a = 0; a < 10000; a = a + 1000) {
-  if (a == 5000) {
-    // print "a is 5000";
-    break;
-  } else {
-    print "a is not 5000";
-  }
+  return count;
 }
 
-print "Entering while loop";
-while (a > 0) {
-  a = a - 1000;
-  if (a == 3000) {
-    continue;
-  }
-  print a;
-}
+store counter = makeCounter();
+counter(); // "1".
+counter(); // "2".

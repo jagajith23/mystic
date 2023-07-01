@@ -86,9 +86,13 @@ class MysticParser:
 
     """
     program         → declaration* EOF
-    declaration     → varDecl | statement
+    declaration     → funDecl | varDecl | statement
+    funDecl         → "fun" function
+    function        → IDENTIFIER "(" parameters? ")" block
+    parameters      → IDENTIFIER ( "," IDENTIFIER )*
     varDecl         → "store" IDENTIFIER ( "=" expression )?
-    statement       → printStmt | expressionStmt | block | ifStmt | whileStmt | forStmt
+    statement       → printStmt | expressionStmt | block | ifStmt | whileStmt | forStmt | returnStmt
+    returnStmt      → "return" expression? ";"
     whileStmt       → "while" "(" expression ")" statement
     forStmt         → "for" "(" ( varDecl | expressionStmt | ";" ) expression? ";" expression? ")" statement
     printStmt       → "print" expression
@@ -102,18 +106,43 @@ class MysticParser:
     comparison      → term ( ( ">" | ">=" | "<" | "<=" ) term )*
     term            → factor ( ( "-" | "+" ) factor )*
     factor          → unary ( ( "/" | "*" ) unary )*
-    unary           → ( "!" | "-" ) unary | primary
+    unary           → ( "!" | "-" ) unary | call
+    call            → primary ( "(" arguments? ")" )*
+    arguments       → expression ( "," expression )*
     primary         → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER
     """
 
     def __declaration(self):
         try:
+            if self.__match(TokenType.FUN):
+                return self.__fun_declaration("function")
             if self.__match(TokenType.STORE):
                 return self.__var_declaration()
             return self.__statement()
         except self.ParseError:
             self.__synchronize()
             return None
+
+    def __fun_declaration(self, kind: str):
+        name = self.__consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+
+        self.__consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+        parameters = []
+        if not self.__check(TokenType.RIGHT_PAREN):
+            parameters.append(
+                self.__consume(TokenType.IDENTIFIER, "Expect parameter name.")
+            )
+            while self.__match(TokenType.COMMA):
+                if len(parameters) >= 255:
+                    self.__error(self.__peek(), "Cannot have more than 255 arguments.")
+                parameters.append(
+                    self.__consume(TokenType.IDENTIFIER, "Expect parameter name.")
+                )
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+        self.__consume(TokenType.LEFT_BRACE, f"Expect '{{' before {kind} body.")
+        body = self.__block()
+        return Stmt.Function(name, parameters, body)
 
     def __var_declaration(self):
         name = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")
@@ -143,6 +172,9 @@ class MysticParser:
 
         if self.__match(TokenType.PRINT):
             return self.__print_statement()
+
+        if self.__match(TokenType.RETURN):
+            return self.__return_statement()
 
         if self.__match(TokenType.LEFT_BRACE):
             return Stmt.Block(self.__block())
@@ -235,6 +267,16 @@ class MysticParser:
         value = self.__expression()
         self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Stmt.Print(value)
+
+    def __return_statement(self):
+        keyword = self.__previous()
+        value = None
+
+        if not self.__check(TokenType.SEMICOLON):
+            value = self.__expression()
+
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Stmt.Return(keyword, value)
 
     def __block(self):
         statements = []
@@ -345,7 +387,32 @@ class MysticParser:
             right = self.__unary()
             return Expr.Unary(operator, right)
 
-        return self.__primary()
+        return self.__call()
+
+    def __call(self):
+        expr = self.__primary()
+
+        while True:
+            if self.__match(TokenType.LEFT_PAREN):
+                expr = self.__finish_call(expr)
+            else:
+                break
+
+        return expr
+
+    def __finish_call(self, callee):
+        args = []
+
+        if not self.__check(TokenType.RIGHT_PAREN):
+            args.append(self.__expression())
+            while self.__match(TokenType.COMMA):
+                if len(args) >= 255:
+                    self.__error(self.__peek(), "Cannot have more than 255 arguments.")
+                args.append(self.__expression())
+
+        paren = self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+
+        return Expr.Call(callee, paren, args)
 
     def __primary(self):
         if self.__match(TokenType.FALSE):

@@ -3,6 +3,9 @@ from stmt import Stmt
 from token_type import TokenType
 from runtime_error import RTE
 from environment import Environment
+from mystic_callable import MysticCallable
+from mystic_function import MysticFunction
+from mystic_return import Return
 
 
 class Interpreter(Expr.Visitor, Stmt.Visitor):
@@ -14,7 +17,22 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
     def __init__(self, mystic):
         self.__mystic = mystic
-        self.__env = Environment()
+        self.globals = Environment()
+        self.__env = self.globals
+
+        class Clock(MysticCallable):
+            def arity(self):
+                return 0
+
+            def call(self, interpreter, arguments):
+                import time
+
+                return time.time()
+
+            def __str__(self):
+                return "<native fn>"
+
+        self.globals.define("clock", Clock())
 
     def interpret(self, statements):
         try:
@@ -43,7 +61,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     def __execute(self, stmt):
         stmt.accept(self)
 
-    def __execute_block(self, statements, env):
+    def _execute_block(self, statements, env):
         previous = self.__env
         try:
             self.__env = env
@@ -87,9 +105,13 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         raise RTE(expr.operator, "Operands must be numbers.")
 
     # ------- Visitor Functions ------- #
+    def visit_function_stmt(self, stmt):
+        function = MysticFunction(stmt, self.__env)
+        self.__env.define(stmt.name.lexeme, function)
+        return None
 
     def visit_block_stmt(self, stmt):
-        self.__execute_block(stmt.statements, Environment(self.__env))
+        self._execute_block(stmt.statements, Environment(self.__env))
         return None
 
     def visit_expression_stmt(self, stmt):
@@ -127,6 +149,12 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         value = self.__evaluate(stmt.expression)
         print(self.__stringify(value))
         return None
+
+    def visit_return_stmt(self, stmt):
+        value = None
+        if stmt.value:
+            value = self.__evaluate(stmt.value)
+        raise Return(value)
 
     def visit_var_stmt(self, stmt):
         value = None
@@ -225,6 +253,28 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             return not self.__is_equal(left, right)
 
         return None
+
+    def visit_call_expr(self, expr):
+        callee = self.__evaluate(expr.callee)
+
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.__evaluate(argument))
+
+        if not isinstance(callee, MysticCallable):
+            raise RTE(expr.paren, "Can only call functions and classes.")
+
+        if len(arguments) != callee.arity():
+            raise RTE(
+                expr.paren,
+                "Expected "
+                + str(callee.arity())
+                + " arguments but got "
+                + str(len(arguments))
+                + ".",
+            )
+
+        return callee.call(self, arguments)
 
     def visit_unary_expr(self, expr):
         right = self.__evaluate(expr.right)
