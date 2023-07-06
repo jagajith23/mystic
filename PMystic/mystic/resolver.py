@@ -147,7 +147,7 @@ class Resolver(Stmt.Visitor, Expr.Visitor):
         if len(self.scopes) == 0:
             return
 
-        if self.scopes[-1].get(name.lexeme) is None:
+        if self.scopes[-1].get(name.lexeme) is not None:
             self.__mystic.error(
                 name, "Already a variable with this name in this scope."
             )
@@ -161,7 +161,7 @@ class Resolver(Stmt.Visitor, Expr.Visitor):
         self.scopes[-1][name.lexeme] = True
 
     def __resolve_local(self, expr, name):
-        for i in range(len(self.scopes) - 1, 0, -1):
+        for i in range(len(self.scopes) - 1, -1, -1):
             if self.scopes[i].get(name.lexeme) is not None:
                 self.__mystic.interpreter.resolve(expr, len(self.scopes) - 1 - i)
                 return

@@ -128,7 +128,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     def visit_if_stmt(self, stmt):
         if self.__is_truthy(self.__evaluate(stmt.condition)):
             self.__execute(stmt.then_branch)
-        elif stmt.else_branch != None:
+        elif stmt.else_branch is not None:
             self.__execute(stmt.else_branch)
         return None
 
@@ -172,7 +172,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
         dist = self.__locals.get(expr)
         if dist is not None:
-            self.__env.assign_at(dist, expr, value)
+            self.__env.assign_at(dist, expr.name, value)
         else:
             self.globals.assign(expr.name, value)
 
@@ -184,7 +184,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         #     raise RTE(
         #         expr.name,
         #         "Undefined variable '"
-        #         + expr.name.lexeme
+        #         + expr
         #         + "'"
         #         + "at line "
         #         + str(expr.name.line)
@@ -197,7 +197,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         dist = self.__locals.get(expr)
 
         if dist is not None:
-            return self.__env.getAt(dist, name.lexeme)
+            return self.__env.get_at(dist, name.lexeme)
         else:
             return self.globals.get(name)
 

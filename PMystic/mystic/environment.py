@@ -19,7 +19,7 @@ class Environment:
         raise RTE(name, f"Undefined variable '{name.lexeme}'.")
 
     def get_at(self, dist, name):
-        return self.__ancestor(dist).__values[name.lexeme]
+        return self.__ancestor(dist).__values[name]
 
     def assign(self, name, value):
         if name.lexeme in self.__values:
