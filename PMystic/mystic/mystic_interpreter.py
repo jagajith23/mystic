@@ -19,6 +19,7 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         self.__mystic = mystic
         self.globals = Environment()
         self.__env = self.globals
+        self.__locals = {}
 
         class Clock(MysticCallable):
             def arity(self):
@@ -60,6 +61,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
     def __execute(self, stmt):
         stmt.accept(self)
+
+    def resolve(self, expr, depth):
+        self.__locals[expr] = depth
 
     def _execute_block(self, statements, env):
         previous = self.__env
@@ -117,8 +121,8 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
     def visit_expression_stmt(self, stmt):
         value = self.__evaluate(stmt.expression)
         if self.__mystic.is_repl:
-            if value is not None:
-                print(self.__stringify(value))
+            # if value is not None:
+            print(self.__stringify(value))
         return None
 
     def visit_if_stmt(self, stmt):
@@ -165,24 +169,37 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
 
     def visit_assign_expr(self, expr):
         value = self.__evaluate(expr.value)
+
+        dist = self.__locals.get(expr)
+        if dist is not None:
+            self.__env.assign_at(dist, expr, value)
+        else:
+            self.globals.assign(expr.name, value)
+
         self.__env.assign(expr.name, value)
         return value
 
     def visit_variable_expr(self, expr):
-        value = self.__env.get(expr.name)
+        # if value is None:
+        #     raise RTE(
+        #         expr.name,
+        #         "Undefined variable '"
+        #         + expr.name.lexeme
+        #         + "'"
+        #         + "at line "
+        #         + str(expr.name.line)
+        #         + ".",
+        #     )
 
-        if value is None:
-            raise RTE(
-                expr.name,
-                "Undefined variable '"
-                + expr.name.lexeme
-                + "'"
-                + "at line "
-                + str(expr.name.line)
-                + ".",
-            )
+        return self.__look_up_variable(expr.name, expr)
 
-        return value
+    def __look_up_variable(self, name, expr):
+        dist = self.__locals.get(expr)
+
+        if dist is not None:
+            return self.__env.getAt(dist, name.lexeme)
+        else:
+            return self.globals.get(name)
 
     def visit_literal_expr(self, expr):
         return expr.value

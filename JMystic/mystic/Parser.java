@@ -218,19 +218,23 @@ public class Parser {
     }
 
     private Stmt breakStatement() {
+        Token keyword = previous();
+
         if (loopDepth == 0)
-            throw error(previous(), "Must be inside a loop to use 'break'.");
+            throw error(keyword, "Must be inside a loop to use 'break'.");
 
         consume(SEMICOLON, "Expect ';' after break statement.");
-        return new Stmt.Break();
+        return new Stmt.Break(keyword);
     }
 
     private Stmt continueStatement() {
+        Token keyword = previous();
+
         if (loopDepth == 0)
-            throw error(previous(), "Must be inside a loop to use 'continue'.");
+            throw error(keyword, "Must be inside a loop to use 'continue'.");
 
         consume(SEMICOLON, "Expect ';' after continue statement.");
-        return new Stmt.Continue();
+        return new Stmt.Continue(keyword);
     }
 
     private Stmt whileStatement() {

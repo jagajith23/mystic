@@ -1,7 +1,9 @@
 package JMystic.mystic;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interpreter
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     final Environment globals = new Environment();
     private Environment env = globals;
+    private final Map<Expr, Integer> locals = new HashMap<>();
 
     private static class BreakException extends RuntimeException {
     }
@@ -49,6 +52,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private void execute(Stmt stmt) {
         stmt.accept(this);
+    }
+
+    void resolve(Expr expr, int depth) {
+        locals.put(expr, depth);
     }
 
     void executeBlock(List<Stmt> statements, Environment env) {
@@ -147,8 +154,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         Object value = evaluate(stmt.expression);
         if (Mystic.isRepl)
-            if (value != null)
-                System.out.println(stringify(value));
+            // if (value != null)
+            System.out.println(stringify(value));
         return null;
     }
 
@@ -214,19 +221,34 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.value);
-        env.assign(expr.name, value);
+
+        Integer dist = locals.get(expr);
+        if (dist != null)
+            env.assignAt(dist, expr.name, value);
+        else
+            globals.assign(expr.name, value);
+
         return value;
     }
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        Object value = env.get(expr.name);
 
-        if (value == null)
-            throw new RuntimeError(expr.name, "Undefined variable '" + expr.name.lexeme + "'" + " at line "
-                    + expr.name.line + ".");
+        // if (value == null)
+        // throw new RuntimeError(expr.name, "Undefined variable '" + expr.name.lexeme +
+        // "'" + " at line "
+        // + expr.name.line + ".");
 
-        return value;
+        return lookUpVariable(expr.name, expr);
+    }
+
+    private Object lookUpVariable(Token name, Expr expr) {
+        Integer dist = locals.get(expr);
+
+        if (dist != null)
+            return env.getAt(dist, name.lexeme);
+        else
+            return globals.get(name);
     }
 
     @Override

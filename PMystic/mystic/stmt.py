@@ -53,10 +53,22 @@ class Stmt:
             return visitor.visit_block_stmt(self)
 
     class Break:
+        def __init__(
+            self,
+            keyword,
+        ):
+            self.keyword = keyword
+
         def accept(self, visitor):
             return visitor.visit_break_stmt(self)
 
     class Continue:
+        def __init__(
+            self,
+            keyword,
+        ):
+            self.keyword = keyword
+
         def accept(self, visitor):
             return visitor.visit_continue_stmt(self)
 

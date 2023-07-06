@@ -6,6 +6,7 @@ from mystic_interpreter import Interpreter
 from runtime_error import RTE
 from token_type import *
 from mystic_token import Token
+from resolver import Resolver
 
 
 class Mystic:
@@ -47,6 +48,12 @@ class Mystic:
         if self.__had_error:
             return
 
+        resolver = Resolver(self)
+        resolver.resolve(statements)
+
+        if self.__had_error:
+            return
+
         self.interpreter.interpret(statements)
 
     def __report(self, line: int, where: str, message: str):
@@ -67,17 +74,15 @@ class Mystic:
         self.__had_runtime_error = True
 
     def main(self):
-        # args = sys.argv
+        args = sys.argv
 
-        # if len(args) > 2:
-        #     print("Usage: python mystic.py [filename]")
-        #     sys.exit(64)
-        # elif len(args) == 2:
-        # self.__run_file(args[1])
-        self.__run_file("test.my")
-
-    # else:
-    #     self.__run_prompt()
+        if len(args) > 2:
+            print("Usage: python mystic.py [filename]")
+            sys.exit(64)
+        elif len(args) == 2:
+            self.__run_file(args[1])
+        else:
+            self.__run_prompt()
 
 
 mystic = Mystic()

@@ -200,16 +200,18 @@ class MysticParser:
         return Stmt.If(condition, then_branch, else_branch)
 
     def __break_statement(self):
+        keyword = self.__previous()
         if self.__loop_depth == 0:
-            self.__error(self.__previous(), "Cannot use 'break' outside of a loop.")
+            self.__error(keyword, "Cannot use 'break' outside loop.")
         self.__consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
-        return Stmt.Break()
+        return Stmt.Break(keyword)
 
     def __continue_statement(self):
+        keyword = self.__previous()
         if self.__loop_depth == 0:
-            self.__error(self.__previous(), "Cannot use 'continue' outside of a loop.")
+            self.__error(keyword, "Cannot use 'continue' outside loop.")
         self.__consume(TokenType.SEMICOLON, "Expect ';' after 'continue'.")
-        return Stmt.Continue()
+        return Stmt.Continue(keyword)
 
     def __while_statement(self):
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")

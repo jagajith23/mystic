@@ -23,8 +23,8 @@ class GenerateAst:
             "Stmt",
             [
                 "Block       : statements",
-                "Break       : ",
-                "Continue    : ",
+                "Break       : keyword",
+                "Continue    : keyword",
                 "Expression  : expression",
                 "Function    : name, params, body",
                 "If          : condition, then_branch, else_branch",
