@@ -1,0 +1,16 @@
+// Functions are first-class and capture the scope they were defined in.
+fun makeCounter() {
+  store i = 0;
+  fun count() {
+    i = i + 1;
+    return i;
+  }
+  return count;
+}
+
+store a = makeCounter();
+store b = makeCounter();
+
+print a(); // 1
+print a(); // 2
+print b(); // 1, b has its own i

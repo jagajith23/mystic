@@ -1,0 +1,14 @@
+// Mistakes caught by the resolver before the program runs.
+// Nothing here is executed, so "hello" is never printed.
+print "hello";
+
+{
+  store a = 1;
+  store a = 2;
+}
+
+{
+  store b = b;
+}
+
+return 1;

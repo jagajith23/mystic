@@ -48,6 +48,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         if obj is None:
             return "nil"
 
+        if isinstance(obj, bool):
+            return "true" if obj else "false"
+
         if isinstance(obj, float):
             text = str(obj)
             if text[-2:] == ".0":
@@ -83,8 +86,6 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             return obj != 0
         elif isinstance(obj, str):
             return len(obj) > 0
-        elif isinstance(obj, char):
-            return obj != "\0"
 
         return True
 
@@ -93,6 +94,10 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             return True
         if left is None:
             return False
+        # Python treats True == 1.0; Mystic values of different types are
+        # never equal.
+        if type(left) is not type(right):
+            return False
 
         return left == right
 
@@ -100,13 +105,13 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
         if isinstance(operand, float):
             return
 
-        raise RTE(expr.operator, "Operand must be a number.")
+        raise RTE(operator, "Operand must be a number.")
 
     def __check_number_operands(self, operator, left, right):
         if isinstance(left, float) and isinstance(right, float):
             return
 
-        raise RTE(expr.operator, "Operands must be numbers.")
+        raise RTE(operator, "Operands must be numbers.")
 
     # ------- Visitor Functions ------- #
     def visit_function_stmt(self, stmt):
@@ -250,6 +255,9 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
                 return self.__stringify(left) + str(right)
             elif isinstance(left, str) and isinstance(right, float):
                 return str(left) + self.__stringify(right)
+            raise RTE(
+                expr.operator, "Operands must be two numbers or two strings."
+            )
         elif expr.operator.token_type == TokenType.GREATER:
             self.__check_number_operands(expr.operator, left, right)
             return float(left) > float(right)
@@ -263,10 +271,8 @@ class Interpreter(Expr.Visitor, Stmt.Visitor):
             self.__check_number_operands(expr.operator, left, right)
             return float(left) <= float(right)
         elif expr.operator.token_type == TokenType.EQUAL_EQUAL:
-            self.__check_number_operands(expr.operator, left, right)
             return self.__is_equal(left, right)
         elif expr.operator.token_type == TokenType.BANG_EQUAL:
-            self.__check_number_operands(expr.operator, left, right)
             return not self.__is_equal(left, right)
 
         return None

@@ -38,6 +38,12 @@ class Mystic:
             except EOFError:
                 break
 
+    def run_source(self, source: str) -> None:
+        """Runs a whole program held in a string (for embedding Mystic)."""
+        self.__had_error = False
+        self.__had_runtime_error = False
+        self.__run(source)
+
     def __run(self, source: str):
         scanner = Scanner(source, self)
         tokens = scanner.scan_tokens()

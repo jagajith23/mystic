@@ -1,0 +1,12 @@
+// break and continue work in both for and while loops.
+for (store i = 1; i <= 10; i = i + 1) {
+  if (i == 4) break;
+  print "for " + i;
+}
+
+store n = 0;
+while (n < 5) {
+  n = n + 1;
+  if (n == 3) continue;
+  print "while " + n;
+}
