@@ -202,14 +202,14 @@ class MysticParser:
     def __break_statement(self):
         keyword = self.__previous()
         if self.__loop_depth == 0:
-            self.__error(keyword, "Cannot use 'break' outside loop.")
+            self.__error(keyword, "Must be inside a loop to use 'break'.")
         self.__consume(TokenType.SEMICOLON, "Expect ';' after 'break'.")
         return Stmt.Break(keyword)
 
     def __continue_statement(self):
         keyword = self.__previous()
         if self.__loop_depth == 0:
-            self.__error(keyword, "Cannot use 'continue' outside loop.")
+            self.__error(keyword, "Must be inside a loop to use 'continue'.")
         self.__consume(TokenType.SEMICOLON, "Expect ';' after 'continue'.")
         return Stmt.Continue(keyword)
 

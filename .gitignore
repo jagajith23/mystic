@@ -1,0 +1,10 @@
+# Java
+*.class
+build/
+
+# Python
+__pycache__/
+*.pyc
+
+# Editors / OS
+.DS_Store

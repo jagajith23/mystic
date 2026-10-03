@@ -63,7 +63,7 @@ class Resolver(Stmt.Visitor, Expr.Visitor):
 
     def visit_return_stmt(self, stmt):
         if self.__curr_function == self.FunctionType.NONE:
-            self.__mystic.error(stmt.keyword, "Can't return from top-level code.")
+            self.__mystic.error_at(stmt.keyword, "Can't return from top-level code.")
 
         if stmt.value is not None:
             self.__resolve_expr(stmt.value)
@@ -88,11 +88,11 @@ class Resolver(Stmt.Visitor, Expr.Visitor):
 
     def visit_break_stmt(self, stmt):
         if self.__curr_loop == self.LoopType.NONE:
-            self.__mystic.error(stmt.keyword, "'break' outside loop")
+            self.__mystic.error_at(stmt.keyword, "'break' outside loop.")
 
     def visit_continue_stmt(self, stmt):
         if self.__curr_loop == self.LoopType.NONE:
-            self.__mystic.error(stmt.keyword, "'continue' outside loop")
+            self.__mystic.error_at(stmt.keyword, "'continue' outside loop.")
 
     def visit_assign_expr(self, expr):
         self.__resolve_expr(expr.value)
@@ -100,8 +100,8 @@ class Resolver(Stmt.Visitor, Expr.Visitor):
 
     def visit_ternary_expr(self, expr):
         self.__resolve_expr(expr.condition)
-        self.__resolve_expr(expr.then_branch)
-        self.__resolve_expr(expr.else_branch)
+        self.__resolve_expr(expr.true_expr)
+        self.__resolve_expr(expr.false_expr)
 
     def visit_binary_expr(self, expr):
         self.__resolve_expr(expr.left)
@@ -128,7 +128,9 @@ class Resolver(Stmt.Visitor, Expr.Visitor):
 
     def visit_variable_expr(self, expr):
         if len(self.scopes) != 0 and self.scopes[-1].get(expr.name.lexeme) is False:
-            raise Exception("Cannot read local variable in its own initializer.")
+            self.__mystic.error_at(
+                expr.name, "Cannot read local variable in its own initializer."
+            )
         self.__resolve_local(expr, expr.name)
 
     def __resolve_statement(self, stmt):
@@ -148,7 +150,7 @@ class Resolver(Stmt.Visitor, Expr.Visitor):
             return
 
         if self.scopes[-1].get(name.lexeme) is not None:
-            self.__mystic.error(
+            self.__mystic.error_at(
                 name, "Already a variable with this name in this scope."
             )
 

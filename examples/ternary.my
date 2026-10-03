@@ -1,0 +1,12 @@
+// The ternary operator, plus equality across types.
+store age = 23;
+print age >= 18 ? "adult" : "minor";
+
+fun max(a, b) {
+  return a > b ? a : b;
+}
+print max(3, 9);
+
+print "a" == "a";
+print 1 == "1";
+print nil == false;

@@ -1,0 +1,13 @@
+// Block scoping: inner declarations shadow outer ones.
+store a = "global a";
+store b = "global b";
+{
+  store a = "outer a";
+  {
+    store a = "inner a";
+    print a;
+    print b;
+  }
+  print a;
+}
+print a;

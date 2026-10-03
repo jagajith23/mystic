@@ -312,6 +312,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 return (String) left + stringify(right);
             if (left instanceof Double && right instanceof String)
                 return stringify(left) + (String) right;
+            throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
         } else if (operatorType == TokenType.GREATER) {
             checkNumberOperands(expr.operator, left, right);
             return (double) left > (double) right;
@@ -325,10 +326,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             checkNumberOperands(expr.operator, left, right);
             return (double) left <= (double) right;
         } else if (operatorType == TokenType.BANG_EQUAL) {
-            checkNumberOperands(expr.operator, left, right);
             return !isEqual(left, right);
         } else if (operatorType == TokenType.EQUAL_EQUAL) {
-            checkNumberOperands(expr.operator, left, right);
             return isEqual(left, right);
         }
 
